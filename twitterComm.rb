@@ -1,4 +1,5 @@
 require 'twitter'
+require_relative 'functions'
 
 class TWITTERCOMM
   
@@ -52,7 +53,7 @@ class TWITTERCOMM
   
   #if the seller doesn't have enough shares in the company
   def send_lack_of_shares_tweet( player, company_name )
-    message = "Sorry " + self.check_player_at(player) + ", you don't have enough shares in " + company_name + " to complete the transaction"
+    message = "Sorry " + check_player_at(player) + ", you don't have enough shares in " + company_name + " to complete the transaction"
     
     begin
       Twitter.update(message)
@@ -64,7 +65,7 @@ class TWITTERCOMM
   
   #if the buyer doesn't have enough cash
   def send_insufficient_funds( player )
-    player = self.check_player_at(player)
+    player = check_player_at(player)
     message = "Sorry " + player + ", you don't have enough funds to complete the transaction"
     
     begin
@@ -74,12 +75,15 @@ class TWITTERCOMM
     end
   end
   
-  #check for @ symbol
-  def check_player_at(player)
-    if !player.index("@") then
-      player.insert 0, "@"
-    end
+  def send_portfolio_value_tweet(player, value)
+    message = "Your current portfolio is valued at $" + comma_numbers(value) + " as of the closing bell on " + Time.now.strftime("%b %d, %Y")
     
-    return player
+    begin
+      Twitter.direct_message_create(check_player_at(player), message)
+    rescue => e
+      puts e.message
+    end
   end
+  
+  
 end
