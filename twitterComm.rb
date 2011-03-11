@@ -50,7 +50,36 @@ class TWITTERCOMM
     
   end
   
+  #if the seller doesn't have enough shares in the company
+  def send_lack_of_shares_tweet( player, company_name )
+    message = "Sorry " + self.check_player_at(player) + ", you don't have enough shares in " + company_name + " to complete the transaction"
+    
+    begin
+      Twitter.update(message)
+    rescue => e
+      puts e.message
+    end
+    
+  end  
   
+  #if the buyer doesn't have enough cash
+  def send_insufficient_funds( player )
+    player = self.check_player_at(player)
+    message = "Sorry " + player + ", you don't have enough funds to complete the transaction"
+    
+    begin
+      Twitter.direct_message_create(player, message)
+    rescue => e
+      puts e.message
+    end
+  end
   
-  
+  #check for @ symbol
+  def check_player_at(player)
+    if !player.index("@") then
+      player.insert 0, "@"
+    end
+    
+    return player
+  end
 end
