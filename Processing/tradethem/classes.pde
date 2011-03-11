@@ -11,7 +11,8 @@ class Assets {
     company1 = float( pieces[1] );
     company2 = float( pieces[2] );
     company3 = float( pieces[3] );
-    cash = float( pieces[4] );
+    company4 = float( pieces[4] );
+    cash = float( pieces[5] );
   }
 }
 
