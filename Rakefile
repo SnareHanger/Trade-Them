@@ -14,9 +14,9 @@ task :environment do
 
    ActiveRecord::Base.establish_connection(
      :adapter => "sqlite3",
-     :dbfile => "tradethem.sqlite3"
+     :database => "db/tradethem.sqlite3"
    )
 
-  ActiveRecord::Base.logger = Logger.new(File.open('database.log', 'a'))
+  #ActiveRecord::Base.logger = Logger.new(File.open('database.log', 'a'))
 end
 

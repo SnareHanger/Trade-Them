@@ -2,7 +2,7 @@ require 'active_record'
 
 ActiveRecord::Base.establish_connection(
   :adapter => "sqlite3",
-  :dbfile => "tradethem.sqlite3"
+  :dbfile => "db/tradethem.sqlite3"
 )
 
 #Player id, cash
