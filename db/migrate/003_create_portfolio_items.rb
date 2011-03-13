@@ -3,6 +3,8 @@ class CreatePortfolioItems < ActiveRecord::Migration
     create_table :portfolio_items do |t|
       t.integer :player_id, :null => false
       t.integer :stock_id, :null => false
+      t.decimal :purchase_price, :null => false
+      t.integer :quanitity, :null => false
     end
   end
  
