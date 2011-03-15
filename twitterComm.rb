@@ -1,15 +1,13 @@
 require 'twitter'
-require_relative 'functions'
+require 'functions'
 
 class TWITTERCOMM
   
-  def getMentions
+  def getMentions(since_id = 45969646003822591, count = 50)
     #get all mentions since the first tweet mention...change when the game starts
-    mentions = Twitter.mentions(:count => 50, :since_id => 45969646003822591)
+    mentions = Twitter.mentions(:count => count, :since_id => since_id)
 
-    transactions = Array.new
-
-    mentions.each do |mention|
+    transactions = mentions.collect do |mention|
       mention.text.downcase!
       theMention = mention.text
 
@@ -20,35 +18,38 @@ class TWITTERCOMM
       from = "@" + mention.user.screen_name
       to = ""
 
-      #if the mention has another user's name in it then set the to var otherwise leave it
-      if theMention.include? "@" then
-        type, to, numberOfShares, company, price = mention.text.split(' ')
+      #if the mention has another user's name in it
+      #then set the to var otherwise leave it
+      if theMention.include? "@"
+        type, to, quantity, company, price = mention.text.split(' ')
       else
-        type, numberOfShares, company, price = mention.text.split(' ')
+        type, quantity, company, price = mention.text.split(' ')
       end
 
+      case type
       #if BUY the buyer is the from var
-      if type=="buy" then
+      when "buy"
         buyer = from
-        if !to.empty? then
-          seller = to
-        end
-      end
+        seller = to unless to.empty?
 
       #if SELL the buyer is the from var
-      if type=="sell" then
+      when "sell"
         seller = from
-        if !to.empty? then
-          buyer = to
-        end
+        buyer = to unless to.empty?
       end 
 
       #add to transactions array
-      transactions.push({:type => type, :buyer => buyer, :seller => seller, :numberOfShares => numberOfShares.to_i, :company => company, :price => price.to_f, :executed => false, :transaction_date => Time.new})  
+      {
+        :type => type,
+        :buyer => buyer,
+        :seller => seller,
+        :quantity => quantity.to_i,
+        :company => company,
+        :price => price.to_f
+      }
     end
     
     return transactions
-    
   end
   
   #if the seller doesn't have enough shares in the company
