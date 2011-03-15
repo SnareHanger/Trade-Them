@@ -5,6 +5,7 @@ class CreatePortfolioItems < ActiveRecord::Migration
       t.integer :stock_id, :null => false
       t.decimal :purchase_price, :null => false
       t.integer :quantity, :null => false
+      t.timestamps!
     end
   end
  

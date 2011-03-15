@@ -9,6 +9,7 @@ class CreateTransactions < ActiveRecord::Migration
       t.integer :quantity, :null => false
       t.boolean :executed, :default => false
       t.datetime :expiration_date
+      t.timestamps!
     end
   end
  
