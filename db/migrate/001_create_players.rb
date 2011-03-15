@@ -2,7 +2,7 @@ class CreatePlayers < ActiveRecord::Migration
   def self.up
     create_table :players do |t|
       t.string :username, :null => false
-      t.integer :cash
+      t.decimal :cash
     end
   end
  

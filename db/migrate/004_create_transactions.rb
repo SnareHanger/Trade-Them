@@ -8,6 +8,7 @@ class CreateTransactions < ActiveRecord::Migration
       t.decimal :price, :null => false
       t.integer :quantity, :null => false
       t.boolean :executed, :default => false
+      t.datetime :expiration_date
     end
   end
  
