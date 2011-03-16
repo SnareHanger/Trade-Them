@@ -27,7 +27,7 @@ Twitter.configure do |config|
 end
 
 incoming_tweets = twitComm.getMentions
-#last_tweet_id = ?
+last_tweet_id = nil
 
 #TESTING
 #twitComm.send_lack_of_shares_tweet("@SnareHanger", "Company X")
@@ -41,35 +41,46 @@ incoming_tweets.each do |tweet|
   #"buy" => "Buy" :-P
   tweet[:type].gsub!(/^(\w{1})/) {|s| s.upcase}
 
-  #see if there are any transactions pending
-  txs = Transaction.active.not_executed.where(
-    :type => opposite_type(tweet[:type]),
-    :stock => tweet[:stock]
-  ) #order - most recent first? or oldest first?  thinking oldest
-  #.order("created_at ASC")
-  #oldest_first #scope
+  #whether to create new transaction or not
+  new_tx = false
 
-  #additional filter on buyer or seller
-  case tweet[:type]
-  when /buy/i
-    txs = txs.where(:seller => tweet[:seller])
-  when /sell/i
-    txs = txs.where(:buyer => tweet[:buyer])
+  to = tweet.delete(:to)
+  if to.nil? || to.empty?
+    new_tx = true
+  else
+    #see if there are any transactions pending
+    txs = Transaction.active.not_executed.where(
+      :type => opposite_type(tweet[:type]),
+      :company => tweet[:company] #### need company id!!!
+    ) #order - most recent first? or oldest first?  thinking oldest
+    #.order("created_at ASC")
+    #oldest_first #scope
+
+    #additional filter on buyer or seller
+    case tweet[:type]
+    when /buy/i
+      txs = txs.where(:seller => tweet[:seller])
+    when /sell/i
+      txs = txs.where(:buyer => tweet[:buyer])
+    end
+
+    #any pending transactions?
+    if txs.any?
+      tr = txs.first
+      if tr.quantity == tweet[:quantity] && tr.price == tweet[:price]
+        tr.execute!
+        #update twitter with confirmed transaction
+      else #it's a counter-offer
+        new_tx = true
+      end
+    end
   end
 
-  #any pending transactions?
-  if txs.any?
-    tr = txs.first
-    if tr.quantity == tweet[:quantity] && tr.price == tweet[:price]
-      #tr.execute_and_tweet!
-      tr.execute!
-      #update twitter with confirmed transaction
-    else #it's a counter-offer
-      Transaction.create!(tweet) #should work, if everything was parsed correctly
-    end
-  else #no pending tweets
+  #should work, if everything was parsed correctly
+  if new_tx
+    Transaction.create!(tweet)
   end
 end
 
-
+#save last tweet
 #f.puts last_tweet_id
