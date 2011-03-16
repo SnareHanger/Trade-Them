@@ -32,7 +32,7 @@ class TWITTERCOMM
         buyer = from
         seller = to unless to.empty?
 
-      #if SELL the buyer is the from var
+      #if SELL the seller is the from var
       when "sell"
         seller = from
         buyer = to unless to.empty?
