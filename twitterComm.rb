@@ -54,7 +54,7 @@ class TWITTERCOMM
         when "buy"
           buyer = from
           seller = to unless to.empty?
-
+          
         #if SELL the buyer is the from var
         when "sell"
           seller = from
