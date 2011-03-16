@@ -36,6 +36,9 @@ class Transaction < ActiveRecord::Base
   def execute!
     self.executed = true
     self.save!
+
+    #TODO: Update stock price
+    #Update portfolio of buyer AND seller
   end
 end
 
