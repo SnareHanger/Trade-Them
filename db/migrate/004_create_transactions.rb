@@ -12,8 +12,8 @@ class CreateTransactions < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_index :transactions, [:type, :executed, :stock_id, :price, :quantity, :expiration_date, :buyer_id]
-    add_index :transactions,[:type, :executed, :stock_id, :price, :quantity, :expiration_date, :seller_id]
+    add_index :transactions, [:type, :executed, :stock_id, :price, :quantity, :expiration_date, :buyer_id], :name => 'tx1'
+    add_index :transactions,[:type, :executed, :stock_id, :price, :quantity, :expiration_date, :seller_id], :name => 'tx2'
   end
  
   def self.down
