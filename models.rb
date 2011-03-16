@@ -7,23 +7,23 @@ ActiveRecord::Base.establish_connection(
 
 class Player < ActiveRecord::Base
   has_many :portfolio_items
-  has_many :stocks, :through => :portfolio_items
+  has_many :companys, :through => :portfolio_items
 
   validates_presence_of :username, :cash
   validates_numericality_of :cash
 end
 
-class Stock < ActiveRecord::Base
+class Company < ActiveRecord::Base
   validates_presence_of :symbol, :price
   validates_numericality_of :price
 end
 
 class PortfolioItem < ActiveRecord::Base
-  validates_presence_of :player_id, :stock_id, :purchase_price, :quantity
+  validates_presence_of :player_id, :company_id, :purchase_price, :quantity
 end
 
 class Transaction < ActiveRecord::Base
-  belongs_to :stock
+  belongs_to :company
   belongs_to :buyer, :class => 'Player'
   belongs_to :seller, :class => 'Player'
 
@@ -37,7 +37,8 @@ class Transaction < ActiveRecord::Base
     self.executed = true
     self.save!
 
-    #TODO: Update stock price
+    #TODO: Update company price
+    self.company.update_attributes :price => self.price
     #Update portfolio of buyer AND seller
   end
 end
@@ -46,8 +47,8 @@ class BuyTransaction < Transaction; end
 class SellTransaction < Transaction; end
 
 #Player id, cash
-#PortfolioItem player_id, stock_id, purchase_price, quantity
-#Stock code price total_shares
+#PortfolioItem player_id, company_id, purchase_price, quantity
+#Company code price total_shares
 
-#Stock.find(:code => "foo")
+#Company.find(:code => "foo")
 
