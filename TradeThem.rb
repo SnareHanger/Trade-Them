@@ -1,20 +1,18 @@
 require 'rubygems'
 require 'twitter'
-<<<<<<< HEAD
 require 'parseconfig'
 require_relative "twitterComm"
-=======
+require_relative "models"
 require 'yaml' #muahaha
 
 #relative
-require "twitterComm"
-require 'models'
+#require "twitterComm"
+#require 'models'
 
 def opposite_type(type)
   return "Sell" if type =~ /buy/i
   return "Buy" if type =~ /sell/i
 end
->>>>>>> 33992fc5737d23bda69400d370439f3ac028b13f
 
 twitComm = TWITTERCOMM.new
 
