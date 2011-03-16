@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'twitter'
 require 'parseconfig'
-require "twitterComm"
+require_relative "twitterComm"
 
 twitComm = TWITTERCOMM.new
 

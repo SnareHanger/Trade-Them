@@ -1,5 +1,5 @@
 require 'twitter'
-require 'functions'
+require_relative 'functions'
 
 class TWITTERCOMM
   
@@ -17,7 +17,7 @@ class TWITTERCOMM
       #get the user the mention came from
       from = "@" + mention.user.screen_name
       to = ""
-
+      
       #if the mention has another user's name in it
       #then set the to var otherwise leave it
       if theMention.include? "@"
@@ -25,19 +25,42 @@ class TWITTERCOMM
       else
         type, quantity, company, price = mention.text.split(' ')
       end
+      
+      validData = true
+      
+      if !type || (type != "buy" && type != "sell")
+        validData = false
+      end
+      
+      if !quantity || quantity.to_i == 0
+        validData = false
+      end
+      
+      if !company || company.empty?
+        validData = false
+      end
+      
+      if !price || price.to_f == 0
+        validData = false
+      end
 
+      if !validData?
+        self.tweet_invalid_request(from)
+        next
+      end
+      
       case type
-      #if BUY the buyer is the from var
-      when "buy"
-        buyer = from
-        seller = to unless to.empty?
+        #if BUY the buyer is the from var
+        when "buy"
+          buyer = from
+          seller = to unless to.empty?
 
-      #if SELL the buyer is the from var
-      when "sell"
-        seller = from
-        buyer = to unless to.empty?
-      end 
-
+        #if SELL the buyer is the from var
+        when "sell"
+          seller = from
+          buyer = to unless to.empty?
+      end
+        
       #add to transactions array
       {
         :type => type,
@@ -47,13 +70,14 @@ class TWITTERCOMM
         :company => company,
         :price => price.to_f
       }
+      
     end
     
     return transactions
   end
   
   #if the seller doesn't have enough shares in the company
-  def send_lack_of_shares_tweet( player, company_name )
+  def tweet_lack_of_shares( player, company_name )
     message = "Sorry " + check_player_at(player) + ", you don't have enough shares in " + company_name + " to complete the transaction"
     
     begin
@@ -65,7 +89,7 @@ class TWITTERCOMM
   end  
   
   #if the buyer doesn't have enough cash
-  def send_insufficient_funds( player )
+  def tweet_insufficient_funds( player )
     player = check_player_at(player)
     message = "Sorry " + player + ", you don't have enough funds to complete the transaction"
     
@@ -76,7 +100,8 @@ class TWITTERCOMM
     end
   end
   
-  def send_portfolio_value_tweet(player, value)
+  #send out message to players letting them know their current portfolio value
+  def tweet_portfolio_value (player, value)
     message = "Your current portfolio is valued at $" + comma_numbers(value) + " as of the closing bell on " + Time.now.strftime("%b %d, %Y")
     
     begin
@@ -84,6 +109,20 @@ class TWITTERCOMM
     rescue => e
       puts e.message
     end
+  end
+  
+  #if the tweet was formatted incorrectly
+  def tweet_invalid_request (player)
+    player = check_player_at(player)
+    
+    message = player + "Invalid Trade Request. Format is as follows: BUY (optional handle) 100 CompX 10.50"
+    
+    begin
+      Twitter.update(message)
+    rescue => e
+      puts e.message
+    end
+    
   end
   
   
