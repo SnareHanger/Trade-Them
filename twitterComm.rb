@@ -26,6 +26,7 @@ class TWITTERCOMM
         type, quantity, company, price = mention.text.split(' ')
       end
       
+      #checking the tweet to see if it's valid      
       validData = true
       
       if !type || (type != "buy" && type != "sell")
@@ -42,6 +43,12 @@ class TWITTERCOMM
       
       if !price || price.to_f == 0
         validData = false
+      end
+      
+      if !to.empty? 
+        if (to.include? "@") && (!to.include? " ")
+          validData = false
+        end
       end
 
       if !validData?
@@ -64,6 +71,7 @@ class TWITTERCOMM
       #add to transactions array
       {
         :type => type,
+        :to => to,
         :buyer => buyer,
         :seller => seller,
         :quantity => quantity.to_i,
