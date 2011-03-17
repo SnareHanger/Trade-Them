@@ -1,20 +1,13 @@
 require 'rubygems'
 require 'twitter'
-<<<<<<< HEAD
-require 'parseconfig'
-require_relative "twitterComm"
-=======
 require 'yaml' #muahaha
-
-#relative
-require "twitterComm"
-require 'models'
+require_relative "twitterComm"
+require_relative 'models'
 
 def opposite_type(type)
   return "Sell" if type =~ /buy/i
   return "Buy" if type =~ /sell/i
 end
->>>>>>> 33992fc5737d23bda69400d370439f3ac028b13f
 
 twitComm = TWITTERCOMM.new
 
@@ -51,9 +44,11 @@ incoming_tweets.each do |tweet|
     new_tx = true
   else
     #see if there are any transactions pending
+    company = Company.find_by_symbol(tweet[:company])
+
     txs = Transaction.active.not_executed.where(
       :type => opposite_type(tweet[:type]),
-      :company => tweet[:company] #### need company id!!!
+      :company => company
     ) #order - most recent first? or oldest first?  thinking oldest
     #.order("created_at ASC")
     #oldest_first #scope
