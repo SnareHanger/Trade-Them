@@ -1,0 +1,9 @@
+@SnareHanger: @TradeThem buh 123 compa
+
+@SnareHanger: @TradeThem SELL @voxels 100 CompB 14.50
+
+@SnareHanger: @TradeThem BUY 100 CompA 10.20
+
+@SnareHanger: @TradeThem BUY @voxels 100 CompX 2.45 
+
+@SnareHanger: @TradeThem SELL @snarehanger 1000 CompX 2.55 
