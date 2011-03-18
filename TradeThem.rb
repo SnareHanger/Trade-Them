@@ -50,7 +50,7 @@ incoming_tweets.each do |tweet|
       raise CompanyNotFound.new(tweet[:company])
     end
 
-    txs = Transaction.active.not_executed.where(
+    txs = Transaction.active.not_completed.where(
       :type => opposite_type(tweet[:type]),
       :company => company
     ) #order - most recent first? or oldest first?  thinking oldest
@@ -60,7 +60,7 @@ incoming_tweets.each do |tweet|
     #additional filter on buyer or seller
     case tweet[:type]
     when /buy/i
-      txs = txs.where(:seller => tweet[:seller]) #WRONG - NEED ID
+      txs = txs.where(:seller => tweet[:seller]) #WRONG - NEED PLAYER ID
     when /sell/i
       txs = txs.where(:buyer => tweet[:buyer])
     end
@@ -69,7 +69,7 @@ incoming_tweets.each do |tweet|
     if txs.any?
       tr = txs.first
       if tr.quantity == tweet[:quantity] && tr.price == tweet[:price]
-        tr.execute!
+        tr.complete!
         #update twitter with confirmed transaction
       else #it's a counter-offer
         new_tx = true

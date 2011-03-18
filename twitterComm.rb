@@ -51,7 +51,7 @@ class TWITTERCOMM
         end
       end
 
-      if !validData?
+      if !validData
         self.tweet_invalid_request(from)
         next
       end
