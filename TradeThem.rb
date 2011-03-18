@@ -46,6 +46,10 @@ incoming_tweets.each do |tweet|
     #see if there are any transactions pending
     company = Company.find_by_symbol(tweet[:company])
 
+    if company.nil?
+      raise CompanyNotFound.new(tweet[:company])
+    end
+
     txs = Transaction.active.not_executed.where(
       :type => opposite_type(tweet[:type]),
       :company => company
@@ -56,7 +60,7 @@ incoming_tweets.each do |tweet|
     #additional filter on buyer or seller
     case tweet[:type]
     when /buy/i
-      txs = txs.where(:seller => tweet[:seller])
+      txs = txs.where(:seller => tweet[:seller]) #WRONG - NEED ID
     when /sell/i
       txs = txs.where(:buyer => tweet[:buyer])
     end
