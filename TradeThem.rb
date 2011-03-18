@@ -46,7 +46,7 @@ incoming_tweets.each do |tweet|
     #see if there are any transactions pending
     company = Company.find_by_symbol(tweet[:company])
 
-    txs = Transaction.active.not_executed.where(
+    txs = Transaction.active.not_completed.where(
       :type => opposite_type(tweet[:type]),
       :company => company
     ) #order - most recent first? or oldest first?  thinking oldest
@@ -65,7 +65,7 @@ incoming_tweets.each do |tweet|
     if txs.any?
       tr = txs.first
       if tr.quantity == tweet[:quantity] && tr.price == tweet[:price]
-        tr.execute!
+        tr.complete!
         #update twitter with confirmed transaction
       else #it's a counter-offer
         new_tx = true

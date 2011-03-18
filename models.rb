@@ -2,7 +2,7 @@ require 'active_record'
 
 ActiveRecord::Base.establish_connection(
   :adapter => "sqlite3",
-  :dbfile => "db/tradethem.sqlite3"
+  :database => "db/tradethem.sqlite3"
 )
 
 class Player < ActiveRecord::Base
@@ -60,20 +60,20 @@ end
 
 class Transaction < ActiveRecord::Base
   belongs_to :company
-  belongs_to :buyer, :class => 'Player'
-  belongs_to :seller, :class => 'Player'
+  belongs_to :buyer, :class_name => 'Player'
+  belongs_to :seller, :class_name => 'Player'
 
   validates_presence_of :price, :quantity
 
-  scope :executed, where(:executed => true)
-  scope :not_executed, where(:executed => false)
+  scope :completed, where(:completed => true)
+  scope :not_completed, where(:completed => false)
   scope :active, where("expiration_date < ?", Time.now)
 
   def value
     self.price * self.quantity
   end
 
-  def execute!
+  def complete!
     ActiveRecord::Base.transaction do
       #Update portfolios of buyer AND seller
       self.buyer.buy!(self)
@@ -83,7 +83,7 @@ class Transaction < ActiveRecord::Base
       self.company.update_attributes! :price => self.price
 
       #mark transaction as executed
-      self.update_attributes! :executed => true
+      self.update_attributes! :completed => true
     end
   end
 end
