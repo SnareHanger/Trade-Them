@@ -1,7 +1,7 @@
 require 'twitter'
 require_relative 'functions'
 
-class TWITTERCOMM
+class TwitterComm
   
   def getMentions(since_id = 45969646003822591, count = 50)
     #get all mentions since the first tweet mention...change when the game starts
