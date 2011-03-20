@@ -41,6 +41,12 @@ class TradeThem
       #"buy" => "Buy" :-P
       tweet[:type].gsub!(/^(\w{1})/) {|s| s.upcase}
 
+      company = Company.find_by_symbol(tweet[:company].upcase)
+
+      if company.nil?
+        raise CompanyNotFoundError.new(tweet[:company].upcase)
+      end
+
       #whether to create new transaction or not
       new_tx = false
 
@@ -49,8 +55,6 @@ class TradeThem
         new_tx = true
       else
         #see if there are any transactions pending
-        company = Company.find_by_symbol(tweet[:company].upcase)
-
         txs = Transaction.active.not_completed.where(
           :type => opposite_type(tweet[:type]),
           :company => company
@@ -90,18 +94,14 @@ class TradeThem
           when /sell/i
             tx.seller = Player.find_by_username(tweet[:seller])
         end
+
         #puts tweet[:quantity]
+        tx.company = company
         tx.quantity = tweet[:quantity]
-        tx.company = Company.find_by_symbol(tweet[:company].upcase)
         tx.price = tweet[:price]
         
-        #puts tx.type
-        #puts tx.buyer
-        #puts tx.seller
-        #puts tx.quantity
-        #puts tx.company
-        #puts tx.price
-        Transaction.create!(tx)
+        puts tx.inspect
+        tx.save!
       end
     end
   end

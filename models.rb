@@ -1,4 +1,5 @@
 require 'active_record'
+require_relative 'exceptions'
 
 ActiveRecord::Base.establish_connection(
   :adapter => "sqlite3",
@@ -14,7 +15,7 @@ class Player < ActiveRecord::Base
 
   def buy!(tx)
     self.cash -= tx.amount
-    raise InsufficentCash.new(self, tx) if self.cash < 0 #custom exception
+    raise InsufficentCashError.new(self, tx) if self.cash < 0 #custom exception
 
     stock = self.portfolio_items.select {|i| i.company_id == tx.company_id}.first
 
@@ -35,8 +36,8 @@ class Player < ActiveRecord::Base
     stock = self.portfolio_items.select {|i| i.company_id == tx.company_id}.first
 
     #can't sell what you don't have
-    raise InsufficientStock.new(self, tx) if stock.nil?
-    raise InsufficientStock.new(self, tx) if stock.quantity < tx.quantity
+    raise InsufficientStockError.new(self, tx) if stock.nil?
+    raise InsufficientStockError.new(self, tx) if stock.quantity < tx.quantity
 
     stock.quantity -= tx.quantity
     stock.save!
