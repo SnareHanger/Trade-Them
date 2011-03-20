@@ -7,7 +7,7 @@ class TwitterComm
     #get all mentions since the first tweet mention...change when the game starts
     mentions = Twitter.mentions(:count => count, :since_id => since_id)
 
-    transactions = mentions.collect do |mention|
+    mentions.collect do |mention|
       mention.text.downcase!
       theMention = mention.text
 
@@ -75,23 +75,21 @@ class TwitterComm
         :buyer => buyer,
         :seller => seller,
         :quantity => quantity.to_i,
-        :company => company,
+        :company => company.upcase,
         :price => price.to_f
       }
       
     end
-    
-    return transactions
   end
-  
+
   #if the seller doesn't have enough shares in the company
   def tweet_lack_of_shares( player, company_name )
     message = "Sorry " + check_player_at(player) + ", you don't have enough shares in " + company_name + " to complete the transaction"
     
     begin
       Twitter.update(message)
-    rescue => e
-      puts e.message
+    rescue
+      puts $!.message
     end
     
   end  
@@ -103,8 +101,8 @@ class TwitterComm
     
     begin
       Twitter.direct_message_create(player, message)
-    rescue => e
-      puts e.message
+    rescue
+      puts $!.message
     end
   end
   
@@ -114,8 +112,8 @@ class TwitterComm
     
     begin
       Twitter.direct_message_create(check_player_at(player), message)
-    rescue => e
-      puts e.message
+    rescue
+      puts $!.message
     end
   end
   
@@ -133,5 +131,8 @@ class TwitterComm
     
   end
   
-  
+  #entry point for above methods
+  def tweet_error(err)
+    puts err.inspect #:-P #TEMPORARY
+  end  
 end
