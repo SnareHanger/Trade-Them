@@ -1,4 +1,5 @@
-#Unit test for TradeThem
+#Unit tests for TradeThem
+require 'test/unit'
 require 'mocha'
 require_relative 'TradeThem'
 
@@ -20,48 +21,67 @@ class FakeTweet
   end
 end
 
+class FakeMentions
+  def self.mentions1
+    a = []
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 CAX 5.00")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 CAX 5.00")
+    return a
+  end
 
-
-
-mentions1 = []
-mentions1 << FakeTweet.new("daniel", "@TradeThem BUY 100 CAX 5.00")
-mentions1 << FakeTweet.new("mike", "@TradeThem SELL @daniel 100 CAX 5.00")
-
-mentions2 = []
-mentions2 << FakeTweet.new("daniel", "@TradeThem BUY 100 CBX 5.00")
-mentions2 << FakeTweet.new("mike", "@TradeThem SELL @daniel 100 CBX 5.50")
-mentions2 << FakeTweet.new("daniel", "@TradeThem BUY 100 @mike CBX 5.30")
-mentions2 << FakeTweet.new("mike", "@TradeThem SELL @daniel CBX 5.30")
+  def self.mentions2
+    a = []
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 CBX 5.00")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 CBX 5.50")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 @mike CBX 5.30")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel CBX 5.30")
+    return a
+  end
                             
-mentions3 = []              
-mentions3 << FakeTweet.new("daniel", "@TradeThem BUY 100 CBX 5.00")
-mentions3 << FakeTweet.new("mike", "@TradeThem SELL @daniel 100 CBX 5.50")
-mentions3 << FakeTweet.new("daniel", "@TradeThem BUY @mike 100 CBX 5.30")
-mentions3 << FakeTweet.new("voxels", "@TradeThem SELL @daniel 100 CBX 5.20")
-mentions3 << FakeTweet.new("daniel", "@TradeThem BUY @voxels 100 CBX 5.20")
+  def self.mentions3
+    a = []
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 CBX 5.00")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 CBX 5.50")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY @mike 100 CBX 5.30")
+    a << FakeTweet.new("@voxels", "@TradeThem SELL @daniel 100 CBX 5.20")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY @voxels 100 CBX 5.20")
+    return a
+  end
+end
+class TradeThemTest < Test::Unit::TestCase
+  def setup
+     #seed data
+    `cp db/tradetheminit.sqlite3 db/tradethemtest.sqlite3`
 
-# Twitter.stubs(:configure)
+    ActiveRecord::Base.establish_connection(
+      :adapter => "sqlite3",
+      :database => "db/tradethemtest.sqlite3"
+    )
 
+    Twitter.stubs(:configure)
+    Twitter.stubs(:direct_message_create)
+    def Twitter.update(message); puts message; end
 
+    @tt = TradeThem.new
+    @tt.configure
 
-Transaction.delete_all
-Twitter.stubs(:mentions).returns(mentions1)
-tt = TradeThem.new
-tt.configure
-tt.main
-#at this point, database should be in a certain state
-#e.g. Transaction.count should 2
+    Transaction.delete_all
+  end
 
-Transaction.delete_all
-Twitter.stubs(:mentions).returns(mentions2)
-tt = TradeThem.new
-tt.configure
-tt.main
-#at this point, database should be in a certain state
+  def test1
+    Twitter.stubs(:mentions).returns(FakeMentions.mentions1)
+    @tt.main
+    #at this point, database should be in a certain state
+    #e.g. Transaction.count should 2
+  end
 
-Transaction.delete_all
-Twitter.stubs(:mentions).returns(mentions3)
-tt = TradeThem.new
-tt.configure
-tt.main
-#at this point, database should be in a certain state
+  def test2
+    Twitter.stubs(:mentions).returns(FakeMentions.mentions2)
+    @tt.main
+  end
+
+  def test3
+    Twitter.stubs(:mentions).returns(FakeMentions.mentions3)
+    @tt.main
+  end
+end
