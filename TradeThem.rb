@@ -26,7 +26,7 @@ class TradeThem
   end
 
   def main
-    incoming_tweets = @twitComm.getMentions
+    incoming_tweets = @twitComm.getMentions  #(since_id = 45969646003822591)
     last_tweet_id = nil
 
     #TESTING
@@ -36,6 +36,8 @@ class TradeThem
 
     #Go through incoming tweets and process them
     incoming_tweets.each do |tweet|
+      next if tweet.nil? #can be nil if invalid format
+
       last_tweet_id = tweet[:id]
 
       #"buy" => "Buy" :-P
@@ -44,7 +46,7 @@ class TradeThem
       company = Company.find_by_symbol(tweet[:company].upcase)
 
       if company.nil?
-        raise CompanyNotFoundError.new(tweet[:company].upcase)
+        @twitComm.tweet_error CompanyNotFoundError.new(tweet[:company].upcase) and next
       end
 
       #whether to create new transaction or not
@@ -74,8 +76,12 @@ class TradeThem
         if txs.any?
           tr = txs.first
           if tr.quantity == tweet[:quantity] && tr.price == tweet[:price]
-            tr.complete!
-            #update twitter with confirmed transaction
+            begin
+              tr.complete!
+              #update twitter with confirmed transaction
+            rescue
+              @twitComm.tweet_error $! and next
+            end
           else #it's a counter-offer
             new_tx = true
           end
@@ -91,8 +97,15 @@ class TradeThem
         case tweet[:type]
           when /buy/i
             tx.buyer = Player.find_by_username(tweet[:buyer])
+            if tx.buyer.nil?
+              @twitComm.tweet_error PlayerNotFoundError.new(tweet[:buyer]) and next
+             end
+
           when /sell/i
             tx.seller = Player.find_by_username(tweet[:seller])
+            if tx.seller.nil?
+              @twitComm.tweet_error PlayerNotFoundError.new(tweet[:seller]) and next
+             end
         end
 
         #puts tweet[:quantity]
