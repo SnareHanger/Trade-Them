@@ -63,7 +63,7 @@ class Transaction < ActiveRecord::Base
   belongs_to :buyer, :class_name => 'Player'
   belongs_to :seller, :class_name => 'Player'
 
-  validates_presence_of :price, :quantity
+  validates_presence_of :company, :price, :quantity
 
   scope :completed, where(:completed => true)
   scope :not_completed, where(:completed => false)
