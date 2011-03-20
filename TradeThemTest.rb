@@ -3,7 +3,7 @@ require 'test/unit'
 require 'mocha'
 require_relative 'TradeThem'
 
-class Player
+class FakeTwitterUser
   attr_accessor :screen_name
   
   def initialize(n)
@@ -13,10 +13,9 @@ class Player
 end
 
 class FakeTweet
-  attr_accessor :text
-  attr_accessor :user
+  attr_accessor :text, :user
   def initialize(u, txt)
-    @user = Player.new(u)
+    @user = FakeTwitterUser.new(u)
     @text = txt
   end
 end
@@ -24,27 +23,27 @@ end
 class FakeMentions
   def self.mentions1
     a = []
-    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 CAX 5.00")
-    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 CAX 5.00")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 COA 5.00")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 COA 5.00")
     return a
   end
 
   def self.mentions2
     a = []
-    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 CBX 5.00")
-    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 CBX 5.50")
-    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 @mike CBX 5.30")
-    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel CBX 5.30")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 COB 5.00")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 COB 5.50")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 @mike COB 5.30")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel COB 5.30")
     return a
   end
                             
   def self.mentions3
     a = []
-    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 CBX 5.00")
-    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 CBX 5.50")
-    a << FakeTweet.new("@daniel", "@TradeThem BUY @mike 100 CBX 5.30")
-    a << FakeTweet.new("@voxels", "@TradeThem SELL @daniel 100 CBX 5.20")
-    a << FakeTweet.new("@daniel", "@TradeThem BUY @voxels 100 CBX 5.20")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY 100 COB 5.00")
+    a << FakeTweet.new("@mike", "@TradeThem SELL @daniel 100 COB 5.50")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY @mike 100 COB 5.30")
+    a << FakeTweet.new("@voxels", "@TradeThem SELL @daniel 100 COB 5.20")
+    a << FakeTweet.new("@daniel", "@TradeThem BUY @voxels 100 COB 5.20")
     return a
   end
 end
@@ -64,8 +63,6 @@ class TradeThemTest < Test::Unit::TestCase
 
     @tt = TradeThem.new
     @tt.configure
-
-    Transaction.delete_all
   end
 
   def test1
