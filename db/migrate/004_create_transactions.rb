@@ -2,8 +2,8 @@ class CreateTransactions < ActiveRecord::Migration
   def self.up
     create_table :transactions do |t|
       t.string :type, :null => false
-      t.integer :buyer_id, :null => false
-      t.integer :seller_id, :null => false
+      t.integer :buyer_id
+      t.integer :seller_id
       t.integer :stock_id, :null => false
       t.decimal :price, :null => false
       t.integer :quantity, :null => false
