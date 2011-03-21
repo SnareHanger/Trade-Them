@@ -4,6 +4,7 @@ PImage rightNow;
 
 Assets[] assets;
 Prices[] prices;
+String[] companies;
 
 void setup() {
   size( screen.width, screen.height );
@@ -25,6 +26,9 @@ void setup() {
 
   inFile = loadStrings( "stockprices.csv" );
   prices = new Prices[inFile.length - 1];
+  companies = new String[4];
+  companies = inFile[0].split(",");
+  println(companies);
   for( int i = 1; i < inFile.length; i++) {
     String[] pieces = inFile[i].split( "," );
     prices[i-1] = new Prices( pieces );
@@ -123,16 +127,16 @@ void draw() {
   textFont( gothic );
   textAlign( LEFT );
   fill( 255, 255, 0 );
-  text( "AAPL", prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company1, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );
+  text( companies[0], prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company1, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );
 
   fill( 0, 255, 255 );
-  text( "MSFT", prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company2, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );
+  text( companies[1], prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company2, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );
 
   fill( 255, 0, 255 );
-  text( "GOOG", prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company3, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );
+  text( companies[2], prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company3, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );
 
   fill( 0, 255, 0 );
-  text( "MMM", prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company4, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );  
+  text( companies[3], prices.length * stretch + shift + 60, map( prices[ prices.length - 1 ].company4, bottomPrice, topPrice, screen.height/2, 0 ) + 8 );  
 
   //Stock Prices
   textFont( calibri );
@@ -210,28 +214,28 @@ void draw() {
     textFont( gothic );
     textAlign( CENTER );
     fill( 255, 255, 0 );
-    text( "AAPL  $" + nfc( prices[prices.length - 1].company1, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
+    text( companies[0] + "  $" + nfc( prices[prices.length - 1].company1, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
   }
 
   for( int i = 4; i < 8; i++ ) {
     textFont( gothic );
     textAlign( CENTER );
     fill( 0, 255, 255 );
-    text( "MSFT  $" + nfc( prices[prices.length - 1].company2, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
+    text( companies[1] + "  $" + nfc( prices[prices.length - 1].company2, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
   }
 
   for( int i = 8; i < 12; i++ ) {
     textFont( gothic );
     textAlign( CENTER );
     fill( 255, 0, 255 );
-    text( "GOOG  $" + nfc( prices[prices.length - 1].company3, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
+    text( companies[2] + "  $" + nfc( prices[prices.length - 1].company3, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
   }
 
   for( int i = 12; i < 16; i++ ) {
     textFont( gothic );
     textAlign( CENTER );
     fill( 0, 255, 0 );
-    text( "MMM  $" + nfc( prices[prices.length - 1].company4, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
+    text( companies[3] + "  $" + nfc( prices[prices.length - 1].company4, 0 ), screen.width / 2 + shift * 2 - 10, shift + i * 60 );
   }
 
   for( int i = 0; i < assets.length; i++ ) {
