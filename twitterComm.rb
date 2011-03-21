@@ -151,6 +151,8 @@ class TwitterComm
       case message
       when "PlayerNotFoundError"
         Twitter.update(player + " The player was not found")
+      when "CompanyNotFoundError"
+        Twitter.update(player + " That company does not exist")
       end
     rescue => e
       puts e.message
