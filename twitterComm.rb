@@ -3,83 +3,93 @@ require_relative 'functions'
 
 class TwitterComm
   
+  @player = String.new
+  
   def getMentions(since_id = 45969646003822591, count = 50)
-    #get all mentions since the first tweet mention...change when the game starts
-    mentions = Twitter.mentions(:count => count, :since_id => since_id)
+      begin
+        #get all mentions since the first tweet mention...change when the game starts
+        mentions = Twitter.mentions(:count => count, :since_id => since_id)
 
-    mentions.collect do |mention|
-      mention.text.downcase!
-      theMention = mention.text
-
-      #strip the @tradethem handle
-      theMention["@tradethem "] = ""
-
-      #get the user the mention came from
-      from = "@" + mention.user.screen_name
-      to = ""
-      
-      #if the mention has another user's name in it
-      #then set the to var otherwise leave it
-      if theMention.include? "@"
-        type, to, quantity, company, price = mention.text.split(' ')
-      else
-        type, quantity, company, price = mention.text.split(' ')
-      end
-      
-      #checking the tweet to see if it's valid      
-      validData = true
-      
-      if !type || (type != "buy" && type != "sell")
-        validData = false
-      end
-      
-      if !quantity || quantity.to_i == 0
-        validData = false
-      end
-      
-      if !company || company.empty?
-        validData = false
-      end
-      
-      if !price || price.to_f == 0
-        validData = false
-      end
-      
-      if !to.empty? 
-        if (to.include? "@") && (!to.include? " ")
-          validData = false
-        end
-      end
-
-      if !validData
-        self.tweet_invalid_request(from)
-        next
-      end
-      
-      case type
-        #if BUY the buyer is the from var
-        when "buy"
-          buyer = from
-          seller = to unless to.empty?
+          if !(mentions.nil?)
+            mentions.collect do |mention|
+              @player = mention.user.screen_name
           
-        #if SELL the buyer is the from var
-        when "sell"
-          seller = from
-          buyer = to unless to.empty?
-      end
-        
-      #add to transactions array
-      {
-        :type => type,
-        :to => to,
-        :buyer => buyer,
-        :seller => seller,
-        :quantity => quantity.to_i,
-        :company => company.upcase,
-        :price => price.to_f
-      }
+              mention.text.downcase!
+              theMention = mention.text
+
+              #strip the @tradethem handle
+              theMention["@tradethem "] = ""
+
+              #get the user the mention came from
+              from = "@" + mention.user.screen_name
+              to = ""
       
-    end
+              #if the mention has another user's name in it
+              #then set the to var otherwise leave it
+              if theMention.include? "@"
+                type, to, quantity, company, price = mention.text.split(' ')
+              else
+                type, quantity, company, price = mention.text.split(' ')
+              end
+      
+              #checking the tweet to see if it's valid      
+              validData = true
+      
+              if !type || (type != "buy" && type != "sell")
+                validData = false
+              end
+      
+              if !quantity || quantity.to_i == 0
+                validData = false
+              end
+      
+              if !company || company.empty?
+                validData = false
+              end
+      
+              if !price || price.to_f == 0
+                validData = false
+              end
+      
+              if !(to.empty?) 
+                if (!(to.include? "@")) && (to.include? " ")
+                  validData = false
+                end
+              end
+      
+              if !validData
+                self.tweet_invalid_request(from)
+                next
+              end
+      
+              case type
+                #if BUY the buyer is the from var
+                when "buy"
+                  buyer = from
+                  seller = to unless to.empty?
+          
+                #if SELL the buyer is the from var
+                when "sell"
+                  seller = from
+                  buyer = to unless to.empty?
+              end
+        
+              #add to transactions array
+              {
+                :type => type,
+                :to => to,
+                :buyer => buyer,
+                :seller => seller,
+                :quantity => quantity.to_i,
+                :company => company.upcase,
+                :price => price.to_f
+              }
+      
+            end
+        end
+      rescue => e
+        self.tweet_error e
+      end
   end
 
   #if the seller doesn't have enough shares in the company
@@ -133,6 +143,17 @@ class TwitterComm
   
   #entry point for above methods
   def tweet_error(err)
-    puts err.inspect #:-P #TEMPORARY
+    player = check_player_at(@player)
+    
+    message = err.message
+    
+    begin
+      case message
+      when "PlayerNotFoundError"
+        Twitter.update(player + " The player was not found")
+      end
+    rescue => e
+      puts e.message
+    end
   end  
 end
