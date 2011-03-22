@@ -133,11 +133,7 @@ class TradeThem
     end
     
     #run csv updates
-    all_players = Player.all;
-    all_players.each do |p|
-      write_assets_file(p);
-    end
-    
+    write_assets_file(Player.all);        
     write_stock_price_file(Company.all);
     
     
