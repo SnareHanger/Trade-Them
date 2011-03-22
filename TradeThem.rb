@@ -81,13 +81,15 @@ class TradeThem
         #oldest_first #scope
 
         #additional filter on buyer or seller
+        #remember, we are checking to see if this is a confirmation
+        #i.e. original tx is opposite of tweet[:type]
         case tweet[:type]
           when /buy/i
             from = buyer
-            txs = txs.where(:seller_id => seller)
+            txs = txs.where(:seller_id => seller.id)
           when /sell/i
             from = seller
-            txs = txs.where(:buyer_id => buyer)
+            txs = txs.where(:buyer_id => buyer.id)
         end
 
         #any pending transactions?
@@ -96,9 +98,10 @@ class TradeThem
           begin
             debug "Completing older transaction: " + tr.inspect
             tr.complete!(from)
+
             #TODO: Update twitter with confirmed transaction
           rescue
-            @twitComm.tweet_error $! and next
+            @twitComm.tweet_error($!) and next
           end
         else #it's a counter-offer
           puts "Counter offer detected"
@@ -114,20 +117,20 @@ class TradeThem
         tx = Transaction.new
         tx.type = tweet[:type] + "Transaction"
         tx.expiration_date = Time.now + 2*3600 #2 hours from now
-        tx.company_id = company
+        tx.company = company
         tx.quantity = tweet[:quantity]
         tx.price = tweet[:price]
         
         case tweet[:type]
           when /buy/i
-            tx.buyer_id = buyer
-            if tx.buyer_id.nil?
+            tx.buyer = buyer
+            if tx.buyer.nil?
               @twitComm.tweet_error PlayerNotFoundError.new(tweet[:buyer]) and next
              end
 
           when /sell/i
-            tx.seller_id = seller
-            if tx.seller_id.nil?
+            tx.seller = seller
+            if tx.seller.nil?
               @twitComm.tweet_error PlayerNotFoundError.new(tweet[:seller]) and next
              end
         end
@@ -138,8 +141,8 @@ class TradeThem
     end #process tweet loop
 
     #run csv updates
-    write_assets_file(Player.all)
-    write_stock_price_file(Company.all)
+    write_assets_file Player.all(:include => :portfolio_items)
+    write_stock_price_file Company.all
 
     #save the last tweet
     File.open(@last_tweet_file, "w") do |f|

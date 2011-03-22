@@ -66,6 +66,7 @@ class TradeThemTest < Test::Unit::TestCase
     Twitter.stubs(:configure)
     Twitter.stubs(:direct_message_create)
     def Twitter.update(message); puts "[TWEET] #{message}"; end #:-)
+    FakeTweet.stubs(:id).returns(50203620863524864)
 
     @tt = TradeThem.new
     @tt.configure
@@ -89,8 +90,12 @@ class TradeThemTest < Test::Unit::TestCase
     assert_equal 40_000, player0.cash.to_i
     assert_equal 40_000, player1.cash.to_i
 
-    assert_equal 100, player0.shares_in("COA").quantity
-    assert_equal 100, player1.shares_in("COA").quantity
+    symbol = "COA"
+    company = Company.find_by_symbol(symbol)
+    assert_equal 100, company.price.to_i
+
+    assert_equal 100, player0.shares_in(symbol).quantity
+    assert_equal 100, player1.shares_in(symbol).quantity
 
     @tt.main
 
@@ -105,6 +110,9 @@ class TradeThemTest < Test::Unit::TestCase
 
     assert_equal 200, player0.shares_in("COA").quantity
     assert_equal   0, player1.shares_in("COA").quantity
+
+    company.reload
+    assert_equal 5.0, company.price.to_f
   end
 
   def test2
@@ -122,8 +130,12 @@ class TradeThemTest < Test::Unit::TestCase
     assert_equal 40_000, player0.cash.to_i
     assert_equal 40_000, player1.cash.to_i
 
-    assert_equal 100, player0.shares_in("COB").quantity
-    assert_equal 100, player1.shares_in("COB").quantity
+    symbol = "COB"
+    company = Company.find_by_symbol(symbol)
+    assert_equal 100, company.price.to_i
+
+    assert_equal 100, player0.shares_in(symbol).quantity
+    assert_equal 100, player1.shares_in(symbol).quantity
 
     @tt.main
 
@@ -138,6 +150,9 @@ class TradeThemTest < Test::Unit::TestCase
 
     assert_equal 200, player0.shares_in("COB").quantity
     assert_equal   0, player1.shares_in("COB").quantity
+
+    company.reload
+    assert_equal 5.3, company.price.to_f
   end
 
   def test3
@@ -162,9 +177,13 @@ class TradeThemTest < Test::Unit::TestCase
     assert_equal 40_000, player1.cash.to_i
     assert_equal 40_000, player2.cash.to_i
 
-    assert_equal 100, player0.shares_in("COB").quantity
-    assert_equal 100, player1.shares_in("COB").quantity
-    assert_equal 100, player2.shares_in("COB").quantity
+    symbol = "COB"
+    company = Company.find_by_symbol(symbol)
+    assert_equal 100, company.price.to_i
+
+    assert_equal 100, player0.shares_in(symbol).quantity
+    assert_equal 100, player1.shares_in(symbol).quantity
+    assert_equal 100, player2.shares_in(symbol).quantity
 
     @tt.main
 
@@ -179,5 +198,12 @@ class TradeThemTest < Test::Unit::TestCase
     assert_equal 39_480, player0.cash.to_i
     assert_equal 40_000, player1.cash.to_i
     assert_equal 40_520, player2.cash.to_i
+
+    assert_equal 200, player0.shares_in(symbol).quantity
+    assert_equal 100, player1.shares_in(symbol).quantity
+    assert_equal   0, player2.shares_in(symbol).quantity
+
+    company.reload
+    assert_equal 5.2, company.price.to_f
   end
 end
