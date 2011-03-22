@@ -66,7 +66,7 @@ class TradeThemTest < Test::Unit::TestCase
     Twitter.stubs(:configure)
     Twitter.stubs(:direct_message_create)
     def Twitter.update(message); puts "[TWEET] #{message}"; end #:-)
-    FakeTweet.stubs(:id).returns(50203620863524864)
+    FakeTweet.any_instance.stubs(:id).returns(50203620863524864)
 
     @tt = TradeThem.new
     @tt.configure

@@ -76,6 +76,7 @@ class TwitterComm
         
               #add to transactions array
               {
+                :id => mention.id,
                 :type => type,
                 :to => to,
                 :buyer => buyer,

@@ -49,6 +49,7 @@ class TradeThem
       next if tweet.nil? #can be nil if invalid format
 
       last_tweet_id = tweet[:id]
+      debug "last_tweet_id: #{last_tweet_id}"
 
       #"buy" => "Buy" :-P
       tweet[:type].gsub!(/^(\w{1})/) {|s| s.upcase}
@@ -145,6 +146,8 @@ class TradeThem
     write_stock_price_file Company.all
 
     #save the last tweet
+    debug "last_tweet_id: #{last_tweet_id}"
+
     File.open(@last_tweet_file, "w") do |f|
       f.puts last_tweet_id
     end
