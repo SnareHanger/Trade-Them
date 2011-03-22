@@ -47,6 +47,13 @@ class Player < ActiveRecord::Base
     self.cash += tx.amount
     self.save!
   end
+
+  def shares_in(symbol)
+    company = Company.find_by_symbol(symbol)
+    return nil if company.nil?
+
+    self.portfolio_items.find_by_company_id(company.id)
+  end
 end
 
 class Company < ActiveRecord::Base

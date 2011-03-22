@@ -142,17 +142,17 @@ class TwitterComm
   end
   
   #entry point for above methods
-  def tweet_error(err)
-    player = check_player_at(@player)
-    
+  def tweet_error(err)    
     message = err.message
     
     begin
       case message
       when "PlayerNotFoundError"
-        Twitter.update(player + " The player was not found")
+        player = check_player_at(err.player) rescue nil
+        Twitter.update("Player not found: #{player}")
       when "CompanyNotFoundError"
-        Twitter.update(player + " That company does not exist")
+        company = err.company rescue nil
+        Twitter.update(company + "Company does not exist: #{company}")
       else
         puts message
       end

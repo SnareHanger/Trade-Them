@@ -5,6 +5,10 @@ require_relative "twitterComm"
 require_relative 'models'
 
 class TradeThem
+  def initialize
+    @last_tweet_file = "config/last_tweet.txt"
+  end
+
   def debug(s)
     puts(s)
   end
@@ -29,8 +33,9 @@ class TradeThem
   end
 
   def main
-    incoming_tweets = @twitComm.getMentions  #(since_id = 45969646003822591)
-    last_tweet_id = nil
+    last_tweet_id = File.read(@last_tweet_file).chomp rescue nil
+
+    incoming_tweets = @twitComm.getMentions(last_tweet_id.to_i)
 
     #TESTING
     #twitComm.send_lack_of_shares_tweet("@SnareHanger", "Company X")
@@ -130,8 +135,10 @@ class TradeThem
         tx.save!
       end
     end
-  end
 
-  #save last tweet
-  #f.puts last_tweet_id
+    #save the last tweet
+    File.open(@last_tweet_file, "w") do |f|
+      f.puts last_tweet_id
+    end
+  end
 end
