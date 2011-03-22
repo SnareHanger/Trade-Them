@@ -87,8 +87,8 @@ class TwitterComm
       
             end
         end
-      rescue => e
-        self.tweet_error e
+      rescue
+        self.tweet_error $!
       end
   end
 
@@ -158,8 +158,8 @@ class TwitterComm
       when "InsufficientStockError"
         self.tweet_lack_of_shares(err.player.username)
       end
-    rescue => e
-      puts e.message
+    rescue
+      puts $!.message
     end
   end  
 end

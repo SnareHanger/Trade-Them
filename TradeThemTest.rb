@@ -53,10 +53,12 @@ class TradeThemTest < Test::Unit::TestCase
      #seed data
     `cp db/tradetheminit.sqlite3 db/tradethemtest.sqlite3`
 
+    #make sure to use Test data
     ActiveRecord::Base.establish_connection(
       :adapter => "sqlite3",
       :database => "db/tradethemtest.sqlite3"
     )
+    ActiveRecord::Base.logger = Logger.new("log/test.txt")
 
     Twitter.stubs(:configure)
     Twitter.stubs(:direct_message_create)
@@ -64,23 +66,43 @@ class TradeThemTest < Test::Unit::TestCase
 
     @tt = TradeThem.new
     @tt.configure
+
+    Transaction.delete_all
   end
 
   def test1
     Twitter.expects(:mentions).returns(FakeMentions.mentions1)
     #assert_not_nil Twitter.mentions
 
+    p0 = FakeMentions.mentions1[0].user.screen_name
+    p1 = FakeMentions.mentions1[1].user.screen_name
+
+    player0 = Player.find_by_username("@"+p0)
+    player1 = Player.find_by_username("@"+p1)
+
+    assert_not_nil player0, "Could not find Player: #{p0}"
+    assert_not_nil player1, "Could not find Player: #{p1}"
+
+    assert_equal 40_000, player0.cash.to_i
+    assert_equal 40_000, player1.cash.to_i
+
     @tt.main
-    #at this point, database should be in a certain state
-    #e.g. Transaction.count should 2
+
+    player0.reload
+    player1.reload
+    assert_equal 1, Transaction.count, "Transaction.count"
+    t = Transaction.first
+    assert t.completed?, "Transaction.first NOT completed (#{t.inspect})"
+    assert_equal 40_500, player1.cash.to_i
+    assert_equal 39_500, player0.cash.to_i
   end
 
-  def test2
+  def Xtest2
     Twitter.expects(:mentions).returns(FakeMentions.mentions2)
     @tt.main
   end
 
-  def test3
+  def Xtest3
     Twitter.expects(:mentions).returns(FakeMentions.mentions3)
     @tt.main
   end

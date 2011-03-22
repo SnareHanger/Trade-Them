@@ -5,10 +5,13 @@ require_relative "twitterComm"
 require_relative 'models'
 
 class TradeThem
-  
+  def debug(s)
+    puts(s)
+  end
+
   def opposite_type(type)
-    return "Sell" if type =~ /buy/i
-    return "Buy" if type =~ /sell/i
+    return SellTransaction if type =~ /buy/i
+    return BuyTransaction if type =~ /sell/i
   end
 
   def configure
@@ -36,6 +39,7 @@ class TradeThem
 
     #Go through incoming tweets and process them
     incoming_tweets.each do |tweet|
+      debug tweet.inspect
       next if tweet.nil? #can be nil if invalid format
 
       last_tweet_id = tweet[:id]
@@ -44,6 +48,8 @@ class TradeThem
       tweet[:type].gsub!(/^(\w{1})/) {|s| s.upcase}
 
       company = Company.find_by_symbol(tweet[:company].upcase)
+      buyer = Player.find_by_username(tweet[:buyer]) unless tweet[:buyer].blank?
+      seller = Player.find_by_username(tweet[:seller]) unless tweet[:seller].blank?
 
       if company.nil?
         @twitComm.tweet_error CompanyNotFoundError.new(tweet[:company].upcase) and next
@@ -54,12 +60,16 @@ class TradeThem
 
       to = tweet.delete(:to)
       if to.nil? || to.empty?
+        debug "to is blank - new transaction"
         new_tx = true
       else
         #see if there are any transactions pending
-        txs = Transaction.active.not_completed.where(
-          :type => opposite_type(tweet[:type]),
-          :company => company
+        tx_klass = opposite_type(tweet[:type])
+
+        txs = tx_klass.active.not_completed.where(
+          :company_id => company.id,
+          :quantity => tweet[:quantity],
+          :price => tweet[:price]
         ) #order - most recent first? or oldest first?  thinking oldest
         #.order("created_at ASC")
         #oldest_first #scope
@@ -67,51 +77,54 @@ class TradeThem
         #additional filter on buyer or seller
         case tweet[:type]
           when /buy/i
-            txs = txs.where(:seller => tweet[:seller])
+            from = buyer
+            txs = txs.where(:seller_id => seller.id)
           when /sell/i
-            txs = txs.where(:buyer => tweet[:buyer])
+            from = seller
+            txs = txs.where(:buyer_id => buyer.id)
         end
 
         #any pending transactions?
         if txs.any?
           tr = txs.first
-          if tr.quantity == tweet[:quantity] && tr.price == tweet[:price]
-            begin
-              tr.complete!
-              #update twitter with confirmed transaction
-            rescue
-              @twitComm.tweet_error $! and next
-            end
-          else #it's a counter-offer
-            new_tx = true
+          begin
+            debug "Completing older transaction: " + tr.inspect
+            tr.complete!(from)
+            #TODO: Update twitter with confirmed transaction
+          rescue
+            @twitComm.tweet_error $! and next
           end
+        else #it's a counter-offer
+          puts "Counter offer detected"
+          new_tx = true
         end
       end
 
       #should work, if everything was parsed correctly
       if new_tx
+        puts "New Transaction"
         #puts tweet
+
         tx = Transaction.new
-        tx.type = tweet[:type]
+        tx.type = tweet[:type] + "Transaction"
+        tx.expiration_date = Time.now + 2*3600 #2 hours from now
+        tx.company = company
+        tx.quantity = tweet[:quantity]
+        tx.price = tweet[:price]
         
         case tweet[:type]
           when /buy/i
-            tx.buyer = Player.find_by_username(tweet[:buyer])
+            tx.buyer = buyer
             if tx.buyer.nil?
               @twitComm.tweet_error PlayerNotFoundError.new(tweet[:buyer]) and next
              end
 
           when /sell/i
-            tx.seller = Player.find_by_username(tweet[:seller])
+            tx.seller = seller
             if tx.seller.nil?
               @twitComm.tweet_error PlayerNotFoundError.new(tweet[:seller]) and next
              end
         end
-
-        #puts tweet[:quantity]
-        tx.company = company
-        tx.quantity = tweet[:quantity]
-        tx.price = tweet[:price]
         
         puts tx.inspect
         tx.save!
