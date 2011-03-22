@@ -67,7 +67,7 @@ class TradeThem
         tx_klass = opposite_type(tweet[:type])
 
         txs = tx_klass.active.not_completed.where(
-          :company_id => company.id,
+          :company_id => company,
           :quantity => tweet[:quantity],
           :price => tweet[:price]
         ) #order - most recent first? or oldest first?  thinking oldest
@@ -78,10 +78,10 @@ class TradeThem
         case tweet[:type]
           when /buy/i
             from = buyer
-            txs = txs.where(:seller_id => seller.id)
+            txs = txs.where(:seller_id => seller)
           when /sell/i
             from = seller
-            txs = txs.where(:buyer_id => buyer.id)
+            txs = txs.where(:buyer_id => buyer)
         end
 
         #any pending transactions?
@@ -108,20 +108,20 @@ class TradeThem
         tx = Transaction.new
         tx.type = tweet[:type] + "Transaction"
         tx.expiration_date = Time.now + 2*3600 #2 hours from now
-        tx.company = company
+        tx.company_id = company
         tx.quantity = tweet[:quantity]
         tx.price = tweet[:price]
         
         case tweet[:type]
           when /buy/i
-            tx.buyer = buyer
-            if tx.buyer.nil?
+            tx.buyer_id = buyer
+            if tx.buyer_id.nil?
               @twitComm.tweet_error PlayerNotFoundError.new(tweet[:buyer]) and next
              end
 
           when /sell/i
-            tx.seller = seller
-            if tx.seller.nil?
+            tx.seller_id = seller
+            if tx.seller_id.nil?
               @twitComm.tweet_error PlayerNotFoundError.new(tweet[:seller]) and next
              end
         end
