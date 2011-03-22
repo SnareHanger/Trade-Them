@@ -18,7 +18,7 @@ end
 #wants a hash of company_id, current_price
 def write_stock_price_file(stock_prices)
   CSV.open("Processing/tradethem/data/stockprices.csv","ab") do |csv|
-    csv << [stock_prices[0].price.to_s, stock_prices[1].price.to_s, stock_prices[2].price.to_s, stock_prices[3].price.to_s]
+    csv << [stock_prices[0].price.to_s, stock_prices[1].price.to_s, stock_prices[2].price.to_s, stock_prices[3].price.to_s + "\n"]
   end
 end
 
