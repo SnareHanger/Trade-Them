@@ -5,7 +5,7 @@ class TwitterComm
   
   @messaging_player = String.new
   
-  def getMentions(since_id = 50202161296064513, count = 50)
+  def getMentions(since_id = 50203620863524864, count = 50)
       begin
         #get all mentions since the first tweet mention...change when the game starts
         mentions = Twitter.mentions(:count => count, :since_id => since_id)
