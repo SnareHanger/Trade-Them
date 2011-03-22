@@ -87,8 +87,8 @@ class TwitterComm
       
             end
         end
-      rescue => e
-        self.tweet_error e
+      rescue
+        self.tweet_error $!
       end
   end
 
@@ -131,7 +131,7 @@ class TwitterComm
   def tweet_invalid_request (player)
     player = check_player_at(player)
     
-    message = player + "Invalid Trade Request. Format is as follows: BUY (optional handle) 100 CompX 10.50"
+    message = player + " Invalid Trade Request. Format is as follows: BUY (optional handle) 100 CompX 10.50"
     
     begin
       Twitter.update(message)
@@ -153,9 +153,11 @@ class TwitterComm
         Twitter.update(player + " The player was not found")
       when "CompanyNotFoundError"
         Twitter.update(player + " That company does not exist")
+      else
+        puts message
       end
-    rescue => e
-      puts e.message
+    rescue
+      puts $!.message
     end
   end  
 end

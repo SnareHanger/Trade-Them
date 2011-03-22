@@ -1,10 +1,12 @@
 require 'active_record'
+require 'logger'
 require_relative 'exceptions'
 
 ActiveRecord::Base.establish_connection(
   :adapter => "sqlite3",
   :database => "db/tradethem.sqlite3"
 )
+ActiveRecord::Base.logger = Logger.new("log/db.txt")
 
 class Player < ActiveRecord::Base
   has_many :portfolio_items
@@ -55,6 +57,8 @@ end
 
 #purchase_price doesn't work for multiple purchases!!!
 class PortfolioItem < ActiveRecord::Base
+  belongs_to :player
+  belongs_to :company
   validates_presence_of :player_id, :company_id, :quantity
   validates_uniqueness_of :company_id, :scope => :player_id
 end
@@ -68,9 +72,9 @@ class Transaction < ActiveRecord::Base
 
   scope :completed, where(:completed => true)
   scope :not_completed, where(:completed => false)
-  scope :active, where("expiration_date < ?", Time.now)
+  scope :active, where("expiration_date > ?", Time.now)
 
-  def value
+  def amount
     self.price * self.quantity
   end
 
