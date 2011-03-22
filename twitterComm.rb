@@ -3,7 +3,7 @@ require_relative 'functions'
 
 class TwitterComm
   
-  @player = String.new
+  @messaging_player = String.new
   
   def getMentions(since_id = 45969646003822591, count = 50)
       begin
@@ -12,7 +12,7 @@ class TwitterComm
 
           if !(mentions.nil?)
             mentions.collect do |mention|
-              @player = mention.user.screen_name
+              @messaging_player = mention.user.screen_name
           
               mention.text.downcase!
               theMention = mention.text
@@ -131,7 +131,7 @@ class TwitterComm
   def tweet_invalid_request (player)
     player = check_player_at(player)
     
-    message = player + "Invalid Trade Request. Format is as follows: BUY (optional handle) 100 CompX 10.50"
+    message = player + " Invalid Trade Request. Format is as follows: BUY (optional handle) 100 CXO 10.50"
     
     begin
       Twitter.update(message)
@@ -143,16 +143,20 @@ class TwitterComm
   
   #entry point for above methods
   def tweet_error(err)
-    player = check_player_at(@player)
+    messaging_player = check_player_at(@messaging_player)
     
     message = err.message
     
     begin
       case message
       when "PlayerNotFoundError"
-        Twitter.update(player + " The player was not found")
+        Twitter.update(messaging_player + " The player, " + err.player + " was not found")
       when "CompanyNotFoundError"
-        Twitter.update(player + " That company does not exist")
+        Twitter.update(messaging_player + " That company, " + err.company.symbol + " does not exist")
+      when "InsufficientCashError"
+        self.tweet_insufficient_funds(err.player.username)
+      when "InsufficientStockError"
+        self.tweet_lack_of_shares(err.player.username)
       end
     rescue => e
       puts e.message
