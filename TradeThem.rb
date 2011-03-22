@@ -3,6 +3,7 @@ require 'twitter'
 require 'yaml' #muahaha
 require_relative "twitterComm"
 require_relative 'models'
+require_relative 'functions'
 
 class TradeThem
   def debug(s)
@@ -130,6 +131,18 @@ class TradeThem
         tx.save!
       end
     end
+    
+    #run csv updates
+    all_players = Player.all;
+    all_players.each do |p|
+      write_assets_file(p);
+    end
+    
+    write_stock_price_file(Company.all);
+    
+    
+    
+    
   end
 
   #save last tweet

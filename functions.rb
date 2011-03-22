@@ -17,13 +17,13 @@ end
 
 #wants a hash of company_id, current_price
 def write_stock_price_file(stock_prices)
-  CSV.open("/Users/michaelcohen/Development/Ruby/Trade-Them/Processing/tradethem/data/stockprices.csv","ab") do |csv|
-    csv << [stock_prices[1], stock_prices[2], stock_prices[3], stock_prices[4]]
+  CSV.open("Processing/tradethem/data/stockprices.csv","ab") do |csv|
+    csv << [stock_prices[0].price.to_s, stock_prices[1].price.to_s, stock_prices[2].price.to_s, stock_prices[3].price.to_s]
   end
 end
 
 def write_assets_file(player)
-  csv_data = CSV.open("/Users/michaelcohen/Development/Ruby/Trade-Them/Processing/tradethem/data/assets.csv","r")
+  csv_data = CSV.open("Processing/tradethem/data/assets.csv","r")
   headers = csv_data.shift.map {|i| i.to_s }
   
   #creates arrays for each row of data
@@ -44,7 +44,7 @@ def write_assets_file(player)
     end
   end
   
-  CSV.open("/Users/michaelcohen/Development/Ruby/Trade-Them/Processing/tradethem/data/assets.csv", "wb") do |csv|
+  CSV.open("Processing/tradethem/data/assets.csv", "wb") do |csv|
     csv << ["handle","COA","COB","COC","COD"] 
     array_of_hashes.each do |p|
       csv << [p["handle"], p["COA"], p["COB"], p["COC"], p["COD"], p["CASH"]]      
