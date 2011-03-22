@@ -78,7 +78,14 @@ class Transaction < ActiveRecord::Base
     self.price * self.quantity
   end
 
-  def complete!
+  def complete!(player)
+    #already have half the transaction - update tx
+    if self.type == "BuyTransaction"
+      self.seller = player
+    else
+      self.buyer = player
+    end
+
     ActiveRecord::Base.transaction do
       #Update portfolios of buyer AND seller
       self.buyer.buy!(self)

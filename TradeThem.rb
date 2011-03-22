@@ -77,8 +77,10 @@ class TradeThem
         #additional filter on buyer or seller
         case tweet[:type]
           when /buy/i
+            from = buyer
             txs = txs.where(:seller_id => seller.id)
           when /sell/i
+            from = seller
             txs = txs.where(:buyer_id => buyer.id)
         end
 
@@ -87,7 +89,7 @@ class TradeThem
           tr = txs.first
           begin
             debug "Completing older transaction: " + tr.inspect
-            tr.complete!
+            tr.complete!(from)
             #TODO: Update twitter with confirmed transaction
           rescue
             @twitComm.tweet_error $! and next
